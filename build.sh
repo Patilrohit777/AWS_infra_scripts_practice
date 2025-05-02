@@ -1,4 +1,4 @@
-ls
-pwd
-ls
-echo "dsnndvndmv.m"
+
+
+
+bash s3/get_s3_data.sh
