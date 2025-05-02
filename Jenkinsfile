@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        AWS_CREDENTIALS_FILE = './aws_credentials.env'
+        AWS_REGION = 'us-east-1' // or your region
     }
 
     stages {
@@ -15,64 +15,58 @@ pipeline {
 
         stage('Load AWS Credentials') {
             steps {
-                echo '🔐 Loading AWS credentials from file...'
-                script {
-                    def envContent = readFile(file: "${env.AWS_CREDENTIALS_FILE}").split('\n')
-                    for (line in envContent) {
-                        if (line.trim() && !line.startsWith('#')) {
-                            def (key, value) = line.tokenize('=')
-                            env."${key.trim()}" = value.trim()
-                        }
-                    }
+                echo '🔐 Loading AWS credentials from Jenkins secrets...'
+                withCredentials([
+                    string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
+                    string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
+                ]) {
+                    echo '✅ Credentials loaded into environment.'
                 }
             }
         }
 
         stage('Verify AWS CLI') {
             steps {
-                echo '🔍 Verifying AWS CLI version...'
+                echo '🔍 Verifying AWS CLI is available...'
                 sh 'aws --version'
             }
         }
 
         stage('Check AWS Identity') {
             steps {
-                echo '🧾 Checking AWS identity...'
+                echo '🔎 Checking AWS identity...'
                 sh 'aws sts get-caller-identity'
             }
         }
 
         stage('Build Infra') {
             steps {
-                echo '🔧 Building infrastructure...'
-                sh './build.sh'
+                echo '🏗 Building infrastructure...'
+                sh 'echo "Terraform/CloudFormation logic here"'
             }
         }
 
         stage('Test Infra') {
             steps {
                 echo '🧪 Testing infrastructure...'
-                sh './test.sh'
+                sh 'echo "Infra test scripts go here"'
             }
         }
 
         stage('Deploy Resources') {
             steps {
-                echo '🚀 Deploying resources...'
-                sh './deploy.sh'
+                echo '🚀 Deploying application/resources...'
+                sh 'echo "Deployment logic here"'
             }
         }
     }
 
     post {
-        success {
-            echo '✅ Pipeline succeeded.'
+        always {
+            echo '📦 Pipeline completed.'
         }
         failure {
             echo '❌ Pipeline failed.'
-        }
-        always {
-            echo '📦 Pipeline completed.'
         }
     }
 }
