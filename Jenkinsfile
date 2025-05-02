@@ -8,8 +8,8 @@ pipeline {
             steps {
 			          echo "===================================================================="
                 echo 'Building the project for first stage...'
-		            sh 'chmod +x script.sh'
-		            sh './build.sh'
+		            bash 'chmod +x script.sh'
+		            bash './build.sh'
 			          echo "===================================================================="
                 // Add your build commands here, e.g., running a build tool like Maven or Gradle
             }
