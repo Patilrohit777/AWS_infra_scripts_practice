@@ -32,7 +32,7 @@ pipeline {
         stage('Build Infra') {
             steps {
                 echo '🏗 Building infrastructure...'
-                sh 'echo "Terraform/CloudFormation logic here"'
+                sh ./build.sh
             }
         }
 
