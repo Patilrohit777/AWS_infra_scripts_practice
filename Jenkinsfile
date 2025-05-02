@@ -1,27 +1,13 @@
 pipeline {
     agent any
 
-    environment {
-        AWS_REGION = 'us-east-1'  // or your preferred region
-    }
+    // No need to redefine AWS_REGION if it’s already in Global Environment Variables
 
     stages {
         stage('Checkout') {
             steps {
                 echo '📥 Checking out code...'
                 checkout scm
-            }
-        }
-
-        stage('Load AWS Credentials') {
-            steps {
-                echo '🔐 Loading AWS credentials from Jenkins secrets...'
-                withCredentials([
-                    string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
-                    string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
-                ]) {
-                    echo '✅ Credentials loaded into environment.'
-                }
             }
         }
 
@@ -38,8 +24,6 @@ pipeline {
                 sh '''
                 echo "AWS Access Key: $AWS_ACCESS_KEY_ID"
                 echo "AWS Secret Key: $AWS_SECRET_ACCESS_KEY"
-                export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
-                export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
                 aws sts get-caller-identity
                 '''
             }
