@@ -3,25 +3,38 @@ pipeline {
 
     environment {
         BASH = '"C:\\Program Files\\Git\\bin\\bash.exe"'
-        AWS_REGION = 'us-east-1' // Update as needed
+        AWS_CLI_PATH = '"C:\\Program Files\\Amazon\\AWSCLIV2\\aws.exe"'  // Full path to AWS CLI
+        AWS_REGION = 'us-east-1'  // Your AWS region
     }
 
     stages {
+        stage('Declarative: Checkout SCM') {
+            steps {
+                echo "Fetching changes from Git repository..."
+                checkout scm
+            }
+        }
+
         stage('Verify AWS CLI') {
             steps {
-                echo '🔍 Verifying AWS CLI is available...'
+                echo "🔍 Verifying AWS CLI is available..."
                 bat """
-                ${BASH} -c "aws --version"
+                    ${BASH} -c "${AWS_CLI_PATH} --version"  // Verify AWS CLI version
                 """
             }
         }
 
         stage('Configure AWS Credentials') {
             steps {
-                echo '🔐 Setting up AWS credentials...'
-                withAWS(credentials: 'aws-credentials', region: "${AWS_REGION}") {
+                echo "🔐 Setting up AWS credentials..."
+                withCredentials([usernamePassword(credentialsId: 'aws-credentials', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                     bat """
-                    ${BASH} -c "aws sts get-caller-identity"
+                        ${BASH} -c "mkdir -p ~/.aws && echo '[default]' > ~/.aws/credentials"
+                        ${BASH} -c "echo 'aws_access_key_id=$AWS_ACCESS_KEY_ID' >> ~/.aws/credentials"
+                        ${BASH} -c "echo 'aws_secret_access_key=$AWS_SECRET_ACCESS_KEY' >> ~/.aws/credentials"
+                        ${BASH} -c "echo '[default]' > ~/.aws/config"
+                        ${BASH} -c "echo 'region=${AWS_REGION}' >> ~/.aws/config"
+                        ${BASH} -c "${AWS_CLI_PATH} sts get-caller-identity"  // Verify AWS credentials
                     """
                 }
             }
@@ -29,41 +42,41 @@ pipeline {
 
         stage('Build Infra') {
             steps {
-                echo '🏗️ Running build.sh to provision AWS resources...'
-                withAWS(credentials: 'aws-credentials', region: "${AWS_REGION}") {
-                    bat "${BASH} ./build.sh"
-                }
+                echo 'Running build.sh to provision AWS resources...'
+                bat """
+                    ${BASH} ./build.sh
+                """
             }
         }
 
         stage('Test Infra') {
             steps {
-                echo '🧪 Running test.sh to validate infrastructure...'
-                withAWS(credentials: 'aws-credentials', region: "${AWS_REGION}") {
-                    bat "${BASH} ./test.sh"
-                }
+                echo 'Running test.sh to test AWS infrastructure...'
+                bat """
+                    ${BASH} ./test.sh
+                """
             }
         }
 
         stage('Deploy Resources') {
             steps {
-                echo '🚀 Running deploy.sh to deploy services...'
-                withAWS(credentials: 'aws-credentials', region: "${AWS_REGION}") {
-                    bat "${BASH} ./deploy.sh"
-                }
+                echo 'Running deploy.sh to deploy services...'
+                bat """
+                    ${BASH} ./deploy.sh
+                """
             }
         }
     }
 
     post {
         always {
-            echo '📦 Pipeline completed.'
+            echo 'Pipeline completed.'
         }
         success {
-            echo '✅ Pipeline succeeded!'
+            echo '✅ Success!'
         }
         failure {
-            echo '❌ Pipeline failed.'
+            echo '❌ Failed.'
         }
     }
 }
