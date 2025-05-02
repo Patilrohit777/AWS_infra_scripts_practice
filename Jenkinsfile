@@ -19,7 +19,7 @@ pipeline {
             steps {
                 echo "🔍 Verifying AWS CLI is available..."
                 bat """
-                    ${BASH} -c "${AWS_CLI_PATH} --version"  // Verify AWS CLI version
+                    ${BASH} -c "\"${AWS_CLI_PATH}\" --version"  // Verify AWS CLI version with correct quoting
                 """
             }
         }
@@ -34,7 +34,7 @@ pipeline {
                         ${BASH} -c "echo 'aws_secret_access_key=$AWS_SECRET_ACCESS_KEY' >> ~/.aws/credentials"
                         ${BASH} -c "echo '[default]' > ~/.aws/config"
                         ${BASH} -c "echo 'region=${AWS_REGION}' >> ~/.aws/config"
-                        ${BASH} -c "${AWS_CLI_PATH} sts get-caller-identity"  // Verify AWS credentials
+                        ${BASH} -c "\"${AWS_CLI_PATH}\" sts get-caller-identity"  // Verify AWS credentials
                     """
                 }
             }
