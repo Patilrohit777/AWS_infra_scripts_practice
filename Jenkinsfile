@@ -35,7 +35,11 @@ pipeline {
         stage('Check AWS Identity') {
             steps {
                 echo '🔎 Checking AWS identity...'
-                sh 'aws sts get-caller-identity'
+                sh '''
+                export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+                export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+                aws sts get-caller-identity
+                '''
             }
         }
 
