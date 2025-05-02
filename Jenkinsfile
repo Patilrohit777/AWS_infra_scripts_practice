@@ -32,7 +32,8 @@ pipeline {
         stage('Build Infra') {
             steps {
                 echo '🏗 Building infrastructure...'
-                sh "./build.sh"
+                sh 'chmod +x ./build.sh'
+				sh "./build.sh"
             }
         }
 
