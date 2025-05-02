@@ -3,13 +3,22 @@ pipeline {
 
     environment {
         BASH = '"C:\\Program Files\\Git\\bin\\bash.exe"'
-        AWS_REGION = 'us-east-1' // Change this to your preferred region
+        AWS_REGION = 'us-east-1' // Update as needed
     }
 
     stages {
+        stage('Verify AWS CLI') {
+            steps {
+                echo '🔍 Verifying AWS CLI is available...'
+                bat """
+                ${BASH} -c "aws --version"
+                """
+            }
+        }
+
         stage('Configure AWS Credentials') {
             steps {
-                echo "🔐 Setting up AWS credentials..."
+                echo '🔐 Setting up AWS credentials...'
                 withAWS(credentials: 'aws-credentials', region: "${AWS_REGION}") {
                     bat """
                     ${BASH} -c "aws sts get-caller-identity"
@@ -29,7 +38,7 @@ pipeline {
 
         stage('Test Infra') {
             steps {
-                echo '🔍 Running test.sh to test AWS infrastructure...'
+                echo '🧪 Running test.sh to validate infrastructure...'
                 withAWS(credentials: 'aws-credentials', region: "${AWS_REGION}") {
                     bat "${BASH} ./test.sh"
                 }
