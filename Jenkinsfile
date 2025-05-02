@@ -8,7 +8,6 @@ pipeline {
             steps {
 		echo "===================================================================="
                 echo 'Building the project for first stage...'
-		bat '"C:\\Program Files\\Git\\bin\\bash.exe" 'chmod +x script.sh'
 		bat '"C:\\Program Files\\Git\\bin\\bash.exe" "./build.sh"'
 			          echo "===================================================================="
                 // Add your build commands here, e.g., running a build tool like Maven or Gradle
