@@ -6,10 +6,10 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-			          echo "===================================================================="
+		echo "===================================================================="
                 echo 'Building the project for first stage...'
-		            bash 'chmod +x script.sh'
-		            bash './build.sh'
+		bat '"C:\\Program Files\\Git\\bin\\bash.exe" 'chmod +x script.sh'
+		bat '"C:\\Program Files\\Git\\bin\\bash.exe" "./build.sh"'
 			          echo "===================================================================="
                 // Add your build commands here, e.g., running a build tool like Maven or Gradle
             }
@@ -18,9 +18,8 @@ pipeline {
         stage('Test') {
             steps {
                 echo 'Building Docker Image...'
-				script {
-				sh 'chmod +x script.sh'
-		    sh './test.sh'
+		script {
+		    bat '"C:\\Program Files\\Git\\bin\\bash.exe" './test.sh'
 				}
                 // Add your test commands here, e.g., running unit tests
             }
