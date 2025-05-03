@@ -1,3 +1,8 @@
+
+
+echo "#########################################"
+
+
 #!/bin/bash
 
 # Variables - customize these
