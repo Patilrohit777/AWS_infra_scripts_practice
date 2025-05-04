@@ -1,0 +1,80 @@
+pipeline {
+    agent any
+
+    environment {
+        TF_WORKDIR = './terraform' // Path to your Terraform code
+        AWS_REGION = 'us-east-1'   // Modify as needed
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                echo '📥 Checking out code...'
+                checkout scm
+            }
+        }
+
+        stage('Verify AWS CLI') {
+            steps {
+                echo '🔍 Verifying AWS CLI is available...'
+                sh 'aws --version'
+            }
+        }
+
+        stage('Check AWS Identity') {
+            steps {
+                echo '🔎 Checking AWS identity...'
+                sh '''
+                echo "AWS Access Key: $AWS_ACCESS_KEY_ID"
+                echo "AWS Secret Key: $AWS_SECRET_ACCESS_KEY"
+                aws sts get-caller-identity
+                '''
+            }
+        }
+
+        stage('Terraform Init') {
+            steps {
+                echo '🔧 Running terraform init...'
+                dir("${env.TF_WORKDIR}") {
+                    sh 'terraform init'
+                }
+            }
+        }
+
+        stage('Terraform Validate') {
+            steps {
+                echo '✅ Validating Terraform configuration...'
+                dir("${env.TF_WORKDIR}") {
+                    sh 'terraform validate'
+                }
+            }
+        }
+
+        stage('Terraform Plan') {
+            steps {
+                echo '📝 Planning Terraform changes...'
+                dir("${env.TF_WORKDIR}") {
+                    sh 'terraform plan -out=tfplan'
+                }
+            }
+        }
+
+        stage('Terraform Apply') {
+            steps {
+                echo '🚀 Applying Terraform changes...'
+                dir("${env.TF_WORKDIR}") {
+                    sh 'terraform apply -auto-approve tfplan'
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo '📦 Terraform pipeline completed.'
+        }
+        failure {
+            echo '❌ Terraform pipeline failed.'
+        }
+    }
+}
